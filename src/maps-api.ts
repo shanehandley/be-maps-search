@@ -11,8 +11,6 @@ const defaultRequestOptions: AutoCompleteOptions = {
 
 /**
  * @see https://developer.tomtom.com/search-api/documentation/search-service/fuzzy-search
- * 
- * https://api.tomtom.com/search/2/search/Charlotte%20Street.json?typeahead=true&limit=100&countrySet=AUS&minFuzzyLevel=1&maxFuzzyLevel=2&view=Unified&relatedPois=off&key=*****
  */
 export const getPlaceAutocomplete = async (
     address: string,
@@ -22,17 +20,27 @@ export const getPlaceAutocomplete = async (
         throw new Error('MISSING_API_KEY')
     }
 
-    const autocomplete = await axios.get<
-        SearchRequest,
-        AxiosResponse<SearchResponse>
-    >(`https://api.tomtom.com/search/2/search/${address}.json`, {
-        params: {
-            typeahead: true,
-            key: process.env.TOMTOM_API_KEY,
-            limit: 30,
-            countrySet: 'AUS'
-        }
-    })
+    if (!address.trim().length) {
+        throw new Error('INVALID_QUERY')
+    }
 
-    return autocomplete.data.results
+    const params = {
+        typeahead: true,
+        key: process.env.TOMTOM_API_KEY,
+        countrySet: 'AUS',
+        ...options
+    }
+
+    try {
+        const autocomplete = await axios.get<
+            SearchRequest,
+            AxiosResponse<SearchResponse>
+        >(`https://api.tomtom.com/search/2/search/${address}.json`, {
+            params
+        })
+
+        return autocomplete.data.results
+    } catch (error) {
+        return []
+    }
 }
