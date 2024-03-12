@@ -1,3 +1,19 @@
+Example Usage
+=============
+
+```ts
+import { getAutoCompleteDetails } from "./src"
+
+await getAutoCompleteDetails('21 Jump Street', { limit: 5 }).then((result) => {
+    result.map(({ freeformAddress }) => {
+        console.log(freeformAddress)
+        // -> "Jump Street, Redland Bay, Queensland, 4165"
+        // -> ...
+    })
+})
+
+```
+
 Scenario:
 =========
 
@@ -17,7 +33,7 @@ Resources:
 ==========
 
 Place Search Documentation: https://developer.tomtom.com/search-api/documentation/search-service/search-service
-API Key: Oyb0npJAVdRwDauqpFez7zKCy2euUYql
+API Key: <redacted>>
 
 Install:
 ========
@@ -27,6 +43,7 @@ Test:
 =====
 1. yarn install
 2. yarn test
+3. (optional) yarn test --coverage
 
 
 Requirements:

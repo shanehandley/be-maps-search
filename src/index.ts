@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { SearchRequest, SearchResponse } from './types'
+import { SearchRequest, SearchResponse, SearchResponseItemAddress } from './types'
 
 interface SearchOptions {
     limit?: number
@@ -9,16 +9,26 @@ const defaultSearchOptions: SearchOptions = {
     limit: 10,
 }
 
+/**
+ * A subset of the TomTom address results are exposed to consumers according to requirements
+ * in unit tests
+ */
+type AutocompleteResponse = { placeId: string } & Pick<
+    SearchResponseItemAddress,
+    'streetName' | 'streetNumber' | 'countryCode' | 'country' | 'freeformAddress' | 'municipality'
+>
+
 export async function getAutoCompleteDetails(
     address: string,
     options: SearchOptions = defaultSearchOptions
-): Promise<any> {
+): Promise<AutocompleteResponse[]> {
     // get autocomplete results
     const res = await getPlaceAutocomplete(address, options)
         .then((autocompleteResults) => {
             // loop over and get details and map results
             return autocompleteResults.map(({ id: placeId, address }) => {
                 const {
+                    streetName,
                     streetNumber = null,
                     countryCode,
                     country,
@@ -29,6 +39,7 @@ export async function getAutoCompleteDetails(
                 return {
                     placeId,
                     streetNumber,
+                    streetName,
                     countryCode,
                     country,
                     freeformAddress,

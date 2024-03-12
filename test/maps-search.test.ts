@@ -87,7 +87,6 @@ describe('Tomtom Places E2E Tests', () => {
           typeahead: expect.anything()
         }
       })
-
     })
 
     describe('upstream API errors: 500', () => {

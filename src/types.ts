@@ -22,6 +22,21 @@ interface LatLon {
     lon: number
 }
 
+export interface SearchResponseItemAddress {
+    streetName: string
+    streetNumber?: string | null
+    municipality: string
+    countrySecondarySubdivision: string
+    countrySubdivision: string
+    countrySubdivisionName: string
+    countrySubdivisionCode: string
+    countryCode: string
+    country: string
+    countryCodeISO3: string
+    freeformAddress: string
+    localName: string
+}
+
 /**
  * A subset of the API response for the `Fuzzy Search` operation
  * 
@@ -42,20 +57,7 @@ export interface SearchResponse {
         type: string
         id: string
         score: number
-        address: {
-            streetName: string
-            streetNumber?: string
-            municipality: string
-            countrySecondarySubdivision: string
-            countrySubdivision: string
-            countrySubdivisionName: string
-            countrySubdivisionCode: string
-            countryCode: string
-            country: string
-            countryCodeISO3: string
-            freeformAddress: string
-            localName: string
-        },
+        address: SearchResponseItemAddress,
         position: LatLon
         viewport: {
             topLeftPoint: LatLon
