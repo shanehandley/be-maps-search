@@ -2,12 +2,11 @@ import { config } from 'dotenv'
 import { describe } from '@jest/globals'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
-import { getPlaceAutocomplete } from '../src/maps-api'
 import { getAutoCompleteDetails } from '../src'
 
 // These are end-to-end tests and need an api key
 describe('Tomtom Places E2E Tests', () => {
-  describe('getPlaceAutocomplete - Invalid environment', () => {
+  describe('getAutoCompleteDetails - Invalid environment', () => {
     beforeAll(async () => {
       config({
         // This file does not need to exist, as long as the TOMTOM_API_KEY is not found
@@ -16,11 +15,11 @@ describe('Tomtom Places E2E Tests', () => {
     })
 
     it('throws when the TOMTOM_API_KEY is unset', async () => {
-      expect(getPlaceAutocomplete('Charlotte Street')).rejects.toThrow('MISSING_API_KEY')
+      expect(getAutoCompleteDetails('Charlotte Street')).rejects.toThrow('MISSING_API_KEY')
     })
   })
 
-  describe('getAutoCompleteDetails', () => {
+  describe('getAutoCompleteDetails - Valid environment', () => {
     beforeAll(() => {
       config()
     })
@@ -42,26 +41,53 @@ describe('Tomtom Places E2E Tests', () => {
     })
   })
 
-  describe('getPlaceAutocomplete', () => {
+  it('throws when an empty address is provided', async () => {
+    expect(getAutoCompleteDetails('')).rejects.toThrow('INVALID_QUERY')
+  })
+
+  it('throws when an address consisting entirely of whitespace is provided', async () => {
+    expect(getAutoCompleteDetails('               ')).rejects.toThrow('INVALID_QUERY')
+  })
+
+  it('throws when the `limit` option is invalid', async () => {
+    expect(getAutoCompleteDetails('Charlotte Street', {
+      limit: -6
+    })).rejects.toThrow('INVALID_LIMIT')
+  })
+
+  it('handles no results', async () => {
+    const res = await getAutoCompleteDetails('asfasffasfasafsafs');
+    expect(res).toStrictEqual([])
+  })
+
+  it('handles error', async () => {
+    expect(getAutoCompleteDetails('')).rejects.toThrow()
+  })
+
+  describe('getAutoCompleteDetails - options', () => {
+    let adapter: MockAdapter
+
     beforeAll(() => {
       config()
+
+      adapter = new MockAdapter(axios)
     })
 
-    it('throws when an empty address is provided', async () => {
-      expect(getPlaceAutocomplete('')).rejects.toThrow('INVALID_QUERY')
-    })
+    it('honours the `limit` option provided by the consumer', async () => {
+      let adapter: MockAdapter = new MockAdapter(axios)
 
-    it('throws when an address consisting entirely of whitespace is provided', async () => {
-      expect(getPlaceAutocomplete('               ')).rejects.toThrow('INVALID_QUERY')
-    })
+      await getAutoCompleteDetails('Charlotte Street', { limit: 5 })
 
-    it('handles no results', async () => {
-      const res = await getPlaceAutocomplete('asfasffasfasafsafs');
-      expect(res).toStrictEqual([])
-    })
+      // assert: The http call included a `limit` of 5
+      expect(adapter.history.get[0]).toMatchObject({
+        params: {
+          countrySet: expect.anything(),
+          key: expect.anything(),
+          limit: 5,
+          typeahead: expect.anything()
+        }
+      })
 
-    it('handles error', async () => {
-      expect(getPlaceAutocomplete('')).rejects.toThrow()
     })
 
     describe('upstream API errors: 500', () => {
@@ -76,7 +102,7 @@ describe('Tomtom Places E2E Tests', () => {
           message: 'This is a mock 500 response'
         });
 
-        const res = await getPlaceAutocomplete('error500');
+        const res = await getAutoCompleteDetails('error500');
         expect(res).toStrictEqual([])
       })
     })
