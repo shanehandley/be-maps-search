@@ -4,8 +4,8 @@ Example Usage
 ```ts
 import { getAutoCompleteDetails } from "./src"
 
-await getAutoCompleteDetails('21 Jump Street', { limit: 5 }).then((result) => {
-    result.map(({ freeformAddress }) => {
+await getAutoCompleteDetails('21 Jump Street', { limit: 5 }).then((results) => {
+    results.map(({ freeformAddress }) => {
         console.log(freeformAddress)
         // -> "Jump Street, Redland Bay, Queensland, 4165"
         // -> ...
@@ -33,7 +33,7 @@ Resources:
 ==========
 
 Place Search Documentation: https://developer.tomtom.com/search-api/documentation/search-service/search-service
-API Key: <redacted>>
+API Key: (redacted)
 
 Install:
 ========
